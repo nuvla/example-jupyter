@@ -9,6 +9,10 @@ Multi-architecture tags:
 
  - `latest` ([Dockerfile](https://github.com/nuvla/example-jupyter/blob/master/Dockerfile))
 
+Architecture-specific tags:
+
+ - `latest-amd64` ([Dockerfile](https://github.com/nuvla/example-jupyter/blob/master/Dockerfile))
+
 ## How to use this image
 
 To run the container:
