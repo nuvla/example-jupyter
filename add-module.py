@@ -18,7 +18,7 @@ nuvla_api.login_password(os.environ['NUVLA_USERNAME'], os.environ['NUVLA_PASSWOR
 
 comp = {"author": "sixsq",
         "commit": "initial commit",
-        "architecture": "x86",
+        "architectures": ["amd64"],
         "image": {"repository": "nuvla",
                   "image-name": "example-jupyter",
                   "tag": "latest"},
