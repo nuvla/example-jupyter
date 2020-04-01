@@ -1,0 +1,29 @@
+# S3 secret is discovered on Nuvla as S3 credential being part of the
+# infrastructure service group on which the container is running.
+
+# Deployment requires /dev/fuse on the host machine and permission to mount it
+# as volume to the container.
+
+version: "3.7"
+
+# Environment vars provided by Nuvla.
+x-nuvla_env: &nuvla_env
+  NUVLA_DEPLOYMENT_ID: $NUVLA_DEPLOYMENT_ID
+  NUVLA_ENDPOINT: $NUVLA_ENDPOINT
+  NUVLA_API_KEY: $NUVLA_API_KEY
+  NUVLA_API_SECRET: $NUVLA_API_SECRET
+
+services:
+  jupyter:
+    image: docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      <<: *nuvla_env
+    command: >
+      sh -c 'set -x;
+      export PARENT=$$(basename "$$(head /proc/1/cgroup)");
+      export CONT_NAME=jupyter_$$(date +%s);
+      docker run -d -v /var/run/docker.sock:/var/run/docker.sock -e PARENT -e CHILD=$${CONT_NAME} nuvla/docker-cleaner:linux
+      && docker run -v /var/run/docker.sock:/var/run/docker.sock --cap-add=SYS_ADMIN --device /dev/fuse --rm -P --name $${CONT_NAME} --user root -e JUPYTER_ENABLE_LAB=yes -e GRANT_SUDO=yes -e CONT_NAME -e NUVLA_DEPLOYMENT_ID -e NUVLA_ENDPOINT -e NUVLA_API_KEY -e NUVLA_API_SECRET nuvla/example-jupyter-data:0.2.12'
+# In some cases if app armor on the host is too strictly configured you need to use --privileged
