@@ -1,0 +1,61 @@
+# S3 secret is discovered on Nuvla as S3 credential. The credential should be a
+# part of the infrastructure service group on which the container is running.
+
+# Deployment requires /dev/fuse on the host machine and permission to mount it
+# as volume to the container.
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: jupyter
+  template:
+    metadata:
+      labels:
+        k8s-app: jupyter
+        name: jupyter
+    spec:
+      containers:
+        - image: nuvla/example-jupyter-data:0.2.12
+          name: jupyter
+          env:
+            - name: JUPYTER_ENABLE_LAB
+              value: "yes"
+            - name: GRANT_SUDO
+              value: "yes"
+            - name: NUVLA_DEPLOYMENT_ID
+              value: $NUVLA_DEPLOYMENT_ID
+            - name: NUVLA_ENDPOINT
+              value: $NUVLA_ENDPOINT
+            - name: NUVLA_API_KEY
+              value: $NUVLA_API_KEY
+            - name: NUVLA_API_SECRET
+              value: $NUVLA_API_SECRET
+          ports:
+            - name: https
+              containerPort: 8888
+          volumeMounts:
+            - name: devfuse
+              mountPath: /dev/fuse
+      volumes:
+        - name: devfuse
+          hostPath:
+            path: /dev/fuse
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jupyter
+spec:
+  selector:
+    k8s-app: jupyter
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8888
+      name: https

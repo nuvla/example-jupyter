@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+    triggers {
+        pollSCM('5 * * * *')
+    }
+    options { timeout(time: 30) }
+    stages {
+        stage("Build") {
+            steps {
+                sh "docker build --no-cache --pull -t nuvla/example-jupyter-data:\$(cat version.txt) ."
+                sh "docker push nuvla/example-jupyter-data:\$(cat version.txt)"
+            }
+        }
+    }
+    post {
+        failure {
+            mail to: 'konstan@sixsq.com',
+            subject: "Build Failed: ${currentBuild.fullDisplayName}",
+            body: "Build failed, please check: ${env.BUILD_URL}"
+        }
+    }
+}
