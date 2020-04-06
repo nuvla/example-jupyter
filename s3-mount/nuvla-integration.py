@@ -70,6 +70,14 @@ param_id = deployment_param_href(deployment_id, None, 'access-token')
 if token is not None:
     print("Publish token...")
     api.edit(param_id, {'value': token})
+ 
+#
+# Discover and set my real hostname.
+#
+
+if 'NODE_IP' in os.environ:
+    param_id = deployment_param_href(deployment_id, None, 'hostname')
+    api.edit(param_id, {'value': os.environ['NODE_IP']})
 
 #
 # Discover and set my real port.
